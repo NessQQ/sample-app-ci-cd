@@ -1,0 +1,22 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: insurance-crm-backend-api
+  datasource:
+    # Points directly to the internal Kubernetes Postgres Service address
+    url: jdbc:postgresql://postgres-service:5432/insurancedb
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: securedbpassword
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      # Automatically syncs Java models with Postgres tables on startup
+      ddl-auto: update
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true

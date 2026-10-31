@@ -1,0 +1,106 @@
+# 1. STORAGE: Reserves a Folder for Permanent Database Files
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# 2. DATABASE DEPLOYMENT: Launches the Official PostgreSQL Database Container
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: insurancedb
+        - name: POSTGRES_PASSWORD
+          value: securedbpassword
+        resources:
+          requests:
+            cpu: 250m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+---
+# 3. DATABASE SERVICE: Internal DNS Router for the Database
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+spec:
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+---
+# 4. BACKEND DEPLOYMENT: Backend API
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: insurance-backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: insurance-backend
+  template:
+    metadata:
+      labels:
+        app: insurance-backend
+    spec:
+      containers:
+      - name: backend-api
+        image: insurance-backend:local
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 1
+            memory: 1024Mi
+---
+# 5. BACKEND SERVICE: Internal DNS Router for the Backend API
+apiVersion: v1
+kind: Service
+metadata:
+  name: insurance-backend-service
+spec:
+  selector:
+    app: insurance-backend
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
