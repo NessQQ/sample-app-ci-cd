@@ -1,0 +1,8 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: insurance-frontend-ui
+  thymeleaf:
+    cache: false # Allows you to see HTML changes instantly during testing
