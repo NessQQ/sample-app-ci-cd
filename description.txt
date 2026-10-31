@@ -1,0 +1,19 @@
+Business data and logic:
+
+
+1. What the User Sees (The Frontend View)
+* The Compliance Shield: The app loops through all clients. If a trucking company has a valid policy, it flashes a Green "ACTIVE" badge. If their policy deadline has passed, it flashes a Red "EXPIRED"warning.
+* Live Fleet Inspection: Beneath each owner's profile, it dynamically lists every truck they currently have registered (displaying the Model, VIN, and License Plate).
+* Instant Action Button: There is a button to dynamically append a new truck onto an existing owner's fleet via a visual form popup.
+
+2. The Smart Business Logic (The Backend Engine)
+* Initial Automatic Onboarding: When a client is first entered into the system, the app automatically creates their profile, issues their core policy contract, and registers their vehicle inventory all in one swift database transaction.
+* The Fleet Range Calculator: The agent doesn't manually type in pricing. The application counts the trucks in a fleet and calculates the monthly premium using tiered pricing ranges:
+    * 1 to 2 Trucks: Full standard price ($600 per truck + $200 base fee).
+    * 3 to 5 Trucks: Medium fleet volume discount ($500 per truck + $200 base fee).
+    * 6+ Trucks: Large enterprise maximum discount ($400 per truck + $200 base fee).
+* Automatic Premium Re-Rating: The moment agent uses the dashboard to add a new truck to an existing operator, the app checks the new total count, calculates the pricing tier change, and automatically updates their monthly premium bill on the fly.
+
+3. The Security & Infrastructure Rules (The K8s / Database Layer)
+* Immutable Compliance Data: To prevent contract fraud, core fields like a Policy Number, VIN, and License Plate are completely locked down. The code and the database will reject any attempt to alter them after creation. If they change, a brand new record must be issued.
+* Hardened Data Persistence: The cluster runs a dedicated PostgreSQL database container tied directly to physical hard drive. If apps crash, if the containers turn off, or if reboot occurs, data remains completely saved and secure.
